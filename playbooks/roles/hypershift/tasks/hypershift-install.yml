@@ -13,18 +13,7 @@
   args:
     chdir: "{{ hypershift_dir }}"
   register: infra
-  ignore_errors: yes
 
-- name: Save infra creation log to file 
-  copy:
-    content: "{{ infra.stderr }}"
-    dest: "{{ ansible_env.HOME }}/{{ hosted_cluster_name }}-config/infra.log"
-
-- name: Infra creation failed
-  fail: 
-    msg: "Failed to create infra" 
-  when: infra.rc != 0 
-  
 - name: Render hosted cluster configuration
   shell: |
     set -o pipefail && \
@@ -42,6 +31,7 @@
     --vpc-region {{ vpc_region }} \
     --processors {{ processors }} \
     --sys-type {{ sys_type }} \
+    --infra-id {{ infra_id }} \
     --infra-json {{ ansible_env.HOME }}/{{ hosted_cluster_name }}-config/infra.json \
     --render 2>&1 > {{ ansible_env.HOME }}/{{ hosted_cluster_name }}-config/render-cluster.yaml
   args:
